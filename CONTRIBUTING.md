@@ -12,8 +12,6 @@ Thanks for your interest in contributing. This guide covers all three packages i
 - Use the PR template for every pull request. PRs without the template completed are not considered ready for review.
 - Include screenshots, screen recordings, or request/response samples when the problem involves visible behavior or API flow.
 
----
-
 ## Backend
 
 **Location:** `backend/`  
@@ -35,7 +33,6 @@ npm run build
 npm test --if-present
 ```
 
----
 
 ## Client (web)
 
@@ -58,7 +55,6 @@ npm run build
 npm run lint
 ```
 
----
 
 ## Mobile
 
@@ -83,7 +79,6 @@ npx expo export         # verify the app bundles without errors
 npx tsc --noEmit        # TypeScript type check
 ```
 
----
 
 ## Branch and commit conventions
 
@@ -102,13 +97,21 @@ npx tsc --noEmit        # TypeScript type check
 - Keep PRs small and easy to review.
 - Link related issues, for example `Closes #123`.
 - Include screenshots or recordings for any UI-related changes.
+- Use the PR template at [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). It loads automatically when you open a PR. Fill in every section before requesting review.
 
-## Issue reporting
+## Issues and templates
 
-- Use the bug template for defects. Attach logs, request payloads, screenshots, or recordings when relevant.
-- Use the feature template for enhancements. Include mockups, references, or videos when the request is visual.
-- Use the question template for usage help.
-- If you paste links to images or videos, make sure they are accessible to maintainers.
+Issues of all kinds are welcome. You do not need permission to open one. Bug reports, feature ideas, questions, suggestions, discussions, and anything else you want to raise are all fair game.
+
+When your issue matches one of the templates below, use it. GitHub shows the template picker automatically when you click New Issue:
+
+- **Bug report** - a reproducible defect with steps, expected result, and actual result
+- **Feature request** - a new feature or improvement with a clear problem statement
+- **Question** - usage, setup, or clarification help
+
+Templates are at [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/). If your issue does not fit any template, open a blank issue and describe it clearly. Do not leave required template fields empty.
+
+Keep one issue focused on one topic so it can be triaged quickly. Include a screenshot or recording for anything visual or hard to explain in text.
 
 ## Security policy
 
