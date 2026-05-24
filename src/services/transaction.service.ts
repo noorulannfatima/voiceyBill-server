@@ -10,6 +10,73 @@ import {
 import { openai, openAIModel } from "../config/openai.config";
 import { receiptPrompt } from "../utils/prompt";
 
+/**
+ * Sanitize and validate pagination inputs to prevent abuse and crashes
+ * @param pageSize - requested page size (can be string, number, or invalid)
+ * @param pageNumber - requested page number (can be string, number, or invalid)
+ * @returns { pageSize: number, pageNumber: number } - safe, validated values
+ */
+const sanitizeAndValidatePagination = (
+  pageSize: unknown,
+  pageNumber: unknown
+): { pageSize: number; pageNumber: number } => {
+  const MAX_PAGE_SIZE = 100;
+  const MAX_PAGE_NUMBER = 1000;
+
+  // convert values
+  const parsedPageSize = Number(pageSize);
+  const parsedPageNumber = Number(pageNumber);
+
+  // validate pageSize
+  if (
+    !Number.isFinite(parsedPageSize) ||
+    !Number.isInteger(parsedPageSize)
+  ) {
+    throw new BadRequestException(
+      "pageSize must be a valid integer"
+    );
+  }
+
+  if (parsedPageSize <= 0) {
+    throw new BadRequestException(
+      "pageSize must be greater than 0"
+    );
+  }
+
+  if (parsedPageSize > MAX_PAGE_SIZE) {
+    throw new BadRequestException(
+      `pageSize cannot exceed ${MAX_PAGE_SIZE}`
+    );
+  }
+
+  // validate pageNumber
+  if (
+    !Number.isFinite(parsedPageNumber) ||
+    !Number.isInteger(parsedPageNumber)
+  ) {
+    throw new BadRequestException(
+      "pageNumber must be a valid integer"
+    );
+  }
+
+  if (parsedPageNumber <= 0) {
+    throw new BadRequestException(
+      "pageNumber must be greater than 0"
+    );
+  }
+
+  if (parsedPageNumber > MAX_PAGE_NUMBER) {
+    throw new BadRequestException(
+      `pageNumber cannot exceed ${MAX_PAGE_NUMBER}`
+    );
+  }
+
+  return {
+    pageSize: parsedPageSize,
+    pageNumber: parsedPageNumber,
+  };
+};
+
 export const createTransactionService = async (
   body: CreateTransactionType,
   userId: string
@@ -51,8 +118,8 @@ export const getAllTransactionService = async (
     recurringStatus?: "RECURRING" | "NON_RECURRING";
   },
   pagination: {
-    pageSize: number;
-    pageNumber: number;
+  pageSize: unknown;
+  pageNumber: unknown;
   }
 ) => {
   const { keyword, type, recurringStatus } = filters;
@@ -80,8 +147,14 @@ export const getAllTransactionService = async (
     }
   }
 
-  const { pageSize, pageNumber } = pagination;
-  const skip = (pageNumber - 1) * pageSize;
+  // Sanitize pagination inputs to prevent abuse and invalid queries
+const { pageSize, pageNumber } = sanitizeAndValidatePagination(
+  pagination.pageSize,
+  pagination.pageNumber
+);
+
+// SAFE skip (now guaranteed valid)
+const skip = (pageNumber - 1) * pageSize;
 
   const [transations, totalCount] = await Promise.all([
     TransactionModel.find(filterConditions)
