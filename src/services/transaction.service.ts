@@ -406,6 +406,13 @@ export const bulkTransactionService = async (
       insertedCount: result.insertedCount,
       success: true,
     };
+
+
+
+
+
+
+
   } catch (error) {
     throw error;
   }
@@ -423,6 +430,13 @@ export const scanReceiptService = async (
       throw new BadRequestException("Failed to upload file");
     }
 
+    // Fetch the image from Cloudinary and convert to base64
+    const response = await fetch(file.path);
+    const arrayBuffer = await response.arrayBuffer();
+    const base64String = Buffer.from(arrayBuffer).toString("base64");
+    const mimeType = file.mimetype || "image/jpeg";
+    const base64DataUri = `data:${mimeType};base64,${base64String}`;
+
     const result = await openai.chat.completions.create({
       model: openAIModel,
       messages: [
@@ -430,7 +444,7 @@ export const scanReceiptService = async (
           role: "user",
           content: [
             { type: "text", text: receiptPrompt },
-            { type: "image_url", image_url: { url: file.path } },
+            { type: "image_url", image_url: { url: base64DataUri } },
           ],
         },
       ],
@@ -442,14 +456,15 @@ export const scanReceiptService = async (
     const content = result.choices[0]?.message?.content;
 
     if (!content) {
-      return { error: "Could not read receipt content" };
+      throw new BadRequestException("Could not read receipt content");
     }
 
     const data = JSON.parse(content);
 
     if (!data.amount || !data.date) {
-      return { error: "Receipt missing required information" };
+      throw new BadRequestException("Receipt missing required information");
     }
+
     const currency =
       typeof data.currency === "string" &&
       data.currency.trim().toUpperCase() !== "DEFAULT" &&
@@ -457,18 +472,43 @@ export const scanReceiptService = async (
         ? data.currency.trim().toUpperCase()
         : undefined;
 
+    let category =
+      typeof data.category === "string"
+        ? data.category.toLowerCase().trim()
+        : "other";
+
+      const allowedCategories = [
+      "groceries",
+      "dining & restaurants",
+      "transportation",
+      "utilities",
+      "entertainment",
+      "shopping",
+      "healthcare",
+      "travel",
+      "housing & rent",
+      "income",
+      "investments",
+      "other",
+    ];
+
+    if (!allowedCategories.includes(category)) {
+      category = "other";
+    }
+
     return {
       title: data.title || "Receipt",
       amount: data.amount,
       date: data.date,
       description: data.description,
-      category: data.category,
+      category,
       paymentMethod: data.paymentMethod,
       type: data.type,
       currency,
       receiptUrl: file.path,
     };
   } catch (error) {
-    return { error: "Receipt scanning service unavailable" };
+    console.error("Receipt Scan Error:", error);
+    throw new BadRequestException("Receipt scanning service unavailable");
   }
 };

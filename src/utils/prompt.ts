@@ -9,15 +9,15 @@ Analyze this receipt image (base64 encoded) and extract transaction details matc
   "currency": "string",       // ISO 4217 currency code detected from receipt. If no currency is visible, use "DEFAULT"
   "date": "ISO date string",  // Transaction date in YYYY-MM-DD format
   "description": "string",    // Items purchased summary (max 50 words)
-  "category": "string",       // category of the transaction 
-  "type": "EXPENSE"           // Always "EXPENSE" for receipts
+  "category": "string",       // Category of the transaction. Must be one of: groceries, dining & restaurants, transportation, utilities, entertainment, shopping, healthcare, travel, housing & rent, income, investments, other
+  "type": "EXPENSE",           // Always "EXPENSE" for receipts
   "paymentMethod": "string",  // One of: ${Object.values(PaymentMethodEnum).join(",")}
 }
 
 Rules:
 1. Amount must be positive
 2. Date must be valid and in ISO format
-3. Category must match our enum values
+3. Category must be one of the specified allowed values (use "dining & restaurants" for food, restaurants, meals)
 4. Detect currency from symbols/codes when visible: $ -> USD, € -> EUR, £ -> GBP, ₹ -> INR, Rs/PKR -> PKR
 5. If uncertain about currency, use "DEFAULT"
 6. If uncertain about any other field, omit it
