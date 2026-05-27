@@ -94,13 +94,13 @@ export async function toBudgetSummaryDTO(
       // Generate alerts for exceeded categories
       if (exceeded) {
         alerts.push({
-          message: `${categoryLimit.category} budget exceeded by $${(spent - categoryLimit.limit).toFixed(2)}`,
+          message: `${categoryLimit.category} budget exceeded by $${(Math.round(spent - categoryLimit.limit))}`,
           type: "category",
           category: categoryLimit.category,
         });
       } else if (usagePercentage >= 80) {
         alerts.push({
-          message: `${categoryLimit.category} budget is ${usagePercentage.toFixed(1)}% used`,
+          message: `${categoryLimit.category} budget is ${Math.round(usagePercentage)}% used`,
           type: "category",
           category: categoryLimit.category,
         });
@@ -111,7 +111,7 @@ export async function toBudgetSummaryDTO(
         limit: categoryLimit.limit,
         spent,
         remaining,
-        usagePercentage: Number(Math.min(usagePercentage, 100).toFixed(2)),
+        usagePercentage: Number(Math.min(usagePercentage, 100)),
         exceeded,
       };
     }
@@ -130,7 +130,7 @@ export async function toBudgetSummaryDTO(
     });
   } else if (usagePercentage >= 80) {
     alerts.unshift({
-      message: `Overall budget is ${usagePercentage.toFixed(1)}% used`,
+      message: `Overall budget is ${Math.round(usagePercentage)}% used`,
       type: "overall",
     });
   }
@@ -142,7 +142,7 @@ export async function toBudgetSummaryDTO(
     totalBudget: budget.totalBudget,
     spent: totalSpent,
     remaining,
-    usagePercentage: Number(Math.min(usagePercentage, 100).toFixed(2)),
+    usagePercentage: Number(Math.min(usagePercentage, 100)),
     exceeded,
     categories,
     alerts,
